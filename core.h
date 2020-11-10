@@ -42,8 +42,7 @@ private:
   void storeDeploy(std::string input) {
     std::vector<std::string> inputVector =
         coda::split(input, COMMAND_SEPARATOR, 3);
-    std::cout << "Adding: " + inputVector[2] + "/" + inputVector[1] + "/" +
-                     inputVector[0];
+    std::cout << "> deployment added\n";
     this->deployCommand[inputVector[1]] = inputVector[2];
   }
 
