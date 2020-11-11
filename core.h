@@ -1,18 +1,21 @@
+#include "persistence.h"
 #include <iostream>
 #include <map>
 #include <string>
 #include <strings.h>
 #include <vector>
 
-#define DEFAULT_PATH "~"
 #define COMMAND_SEPARATOR " "
 
 class Cli {
 public:
   Cli() {
+    this->persistence = new Persistence();
     this->menu["add-deploy"] = &Cli::storeDeploy;
     this->menu["deploy"] = &Cli::deploy;
     this->menu["exit"] = &Cli::exit;
+
+    this->deployCommand = this->persistence->getAllRecords();
   }
 
   void run() {
@@ -25,6 +28,7 @@ public:
   }
 
 private:
+  Persistence *persistence;
   std::string userInput;
   std::map<std::string, std::string> deployCommand;
   std::map<std::string, void (Cli::*)(std::string)> menu;
@@ -43,6 +47,8 @@ private:
     std::vector<std::string> inputVector =
         coda::split(input, COMMAND_SEPARATOR, 3);
     std::cout << "> deployment added\n";
+
+    this->persistence->addRecord(inputVector[1], inputVector[2]);
     this->deployCommand[inputVector[1]] = inputVector[2];
   }
 
