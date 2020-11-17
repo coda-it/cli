@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <stdlib.h>
 #include <string>
 #include <strings.h>
 #include <vector>
@@ -8,13 +9,14 @@
 class Persistence {
 public:
   Persistence() {
-    this->configFile.open("./config.txt", std::fstream::in | std::fstream::out |
-                                              std::fstream::app);
+    this->configFile.open(this->getConfigFile(), std::fstream::in |
+                                                     std::fstream::out |
+                                                     std::fstream::app);
     this->configFile.close();
   }
 
   void addRecord(std::string key, std::string value) {
-    this->configFile.open("./config.txt", std::ios_base::app);
+    this->configFile.open(this->getConfigFile(), std::ios_base::app);
     this->configFile << key + ":" + value + "\n";
     this->configFile.close();
   }
@@ -23,7 +25,7 @@ public:
     std::string line;
     std::vector<std::string> record;
 
-    this->configFile.open("./config.txt", std::fstream::in);
+    this->configFile.open(this->getConfigFile(), std::fstream::in);
 
     if (this->configFile.is_open()) {
       while (std::getline(this->configFile, line)) {
@@ -46,7 +48,7 @@ public:
     std::string line;
     std::vector<std::string> record;
 
-    this->configFile.open("./config.txt", std::fstream::in);
+    this->configFile.open(this->getConfigFile(), std::fstream::in);
 
     if (this->configFile.is_open()) {
       while (std::getline(this->configFile, line)) {
@@ -64,4 +66,9 @@ public:
 
 private:
   std::fstream configFile;
+
+  std::string getConfigFile() {
+    std::string path(std::getenv("HOME"));
+    return path + "/codacli.cnf";
+  }
 };
