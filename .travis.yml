@@ -4,7 +4,7 @@ compiler:
 - g++
 
 install:
-- mkdir ~/gowork/src/github.com/coda-it/
+- mkdir -p ~/gowork/src/github.com/coda-it/
 - (cd ~/gowork/src/github.com/coda-it/ && git clone https://github.com/coda-it/cpputillib)
 
 script:
