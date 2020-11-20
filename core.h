@@ -6,6 +6,9 @@
 #include <vector>
 
 #define COMMAND_SEPARATOR " "
+#define KEY_SEPARATOR "x"
+#define KEY_DEPLOYMENT "deployment"
+#define KEY_PROVISION "provision"
 
 class Cli {
 public:
@@ -13,9 +16,11 @@ public:
     this->persistence = new Persistence();
     this->menu["add-deploy"] = &Cli::storeDeploy;
     this->menu["deploy"] = &Cli::deploy;
+    this->menu["add-provision"] = &Cli::storeProvision;
+    this->menu["provision"] = &Cli::provision;
     this->menu["exit"] = &Cli::exit;
 
-    this->deployCommand = this->persistence->getAllRecords();
+    this->command = this->persistence->getAllRecords();
   }
 
   void run() {
@@ -30,38 +35,50 @@ public:
 private:
   Persistence *persistence;
   std::string userInput;
-  std::map<std::string, std::string> deployCommand;
+  std::map<std::string, std::string> command;
   std::map<std::string, void (Cli::*)(std::string)> menu;
 
   void handleInput(std::string input) {
-    std::vector<std::string> inputVector =
+    const std::vector<std::string> inputVector =
         coda::split(input, COMMAND_SEPARATOR);
-    std::string command = inputVector[0];
+    const std::string command = inputVector[0];
 
     if (this->menu.find(command) != this->menu.end()) {
       (this->*menu[command])(this->userInput);
     }
   }
 
-  void storeDeploy(std::string input) {
-    std::vector<std::string> inputVector =
+  void store(std::string input, std::string prefix) {
+    const std::vector<std::string> inputVector =
         coda::split(input, COMMAND_SEPARATOR, 3);
-    std::cout << "> deployment added\n";
+    const std::string key = prefix + KEY_SEPARATOR + inputVector[1];
+    const std::string value = inputVector[2];
 
-    this->persistence->addRecord(inputVector[1], inputVector[2]);
-    this->deployCommand[inputVector[1]] = inputVector[2];
+    this->persistence->addRecord(key, value);
+    this->command[key] = value;
+
+    std::cout << "> " + prefix + " stored\n";
   }
 
-  void deploy(std::string input) {
-    std::vector<std::string> inputVector =
-        coda::split(input, COMMAND_SEPARATOR);
-    std::string deployment = inputVector[1];
+  void storeDeploy(std::string input) { this->store(input, "deployment"); }
 
-    if (this->deployCommand.find(deployment) != this->deployCommand.end()) {
-      const char *cmd = this->deployCommand[deployment].c_str();
+  void storeProvision(std::string input) { this->store(input, "provision"); }
+
+  void execute(std::string input, std::string prefix) {
+    const std::vector<std::string> inputVector =
+        coda::split(input, COMMAND_SEPARATOR);
+    const std::string key =
+        prefix + std::string(KEY_SEPARATOR) + inputVector[1];
+
+    if (this->command.find(key) != this->command.end()) {
+      const char *cmd = this->command[key].c_str();
       std::system(cmd);
     }
   }
+
+  void deploy(std::string input) { this->execute(input, KEY_DEPLOYMENT); }
+
+  void provision(std::string input) { this->execute(input, KEY_PROVISION); }
 
   void exit(std::string input) { ::exit(0); }
 };
