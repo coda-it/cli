@@ -47,7 +47,6 @@ public:
     int key;
     do {
       this->render();
-      std::cout << "key: " << key << "\n\r";
       key = getchar();
       this->handleInput(key);
     } while (true);
