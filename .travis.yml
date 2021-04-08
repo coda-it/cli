@@ -4,8 +4,9 @@ compiler:
 - g++
 
 install:
+- sudo add-apt-repository ppa:jonathonf/gcc-7.1
 - sudo apt-get update
-- sudo apt-get install gcc-7
+- sudo apt-get install gcc-7 g++-7
 - mkdir -p ~/gowork/src/github.com/coda-it/
 - (cd ~/gowork/src/github.com/coda-it/ && git clone https://github.com/coda-it/cpputillib)
 
