@@ -27,16 +27,17 @@ public:
     std::cout << "=== CODA_ CLI ===\n\r\n\r";
 
     int index = 0;
-    for (auto &&[key, value] : this->menu) {
+
+    for (auto const &item : this->menu) {
       if (index == this->selected) {
-        std::cout << "> " + key + "\n\r";
+        std::cout << "> " + item.first + "\n\r";
       } else {
-        std::cout << "  " + key + "\n\r";
+        std::cout << "  " + item.first + "\n\r";
       }
 
       index++;
     }
-    // erase cursor
+    // hide cursor
     std::cout << "\e[?25l";
   }
 
@@ -64,9 +65,9 @@ private:
       this->selected += 1;
     } else if (input == KEY_ENTER) {
       int index = 0;
-      for (auto &&[key, value] : this->menu) {
+      for (auto const &item : this->menu) {
         if (index == this->selected) {
-          (this->*menu[key])();
+          (this->*menu[item.first])();
         }
         index++;
       }
@@ -78,6 +79,8 @@ private:
   void exit() {
     // clear screen
     std::cout << "\033[2J\033[1;1H";
+    // show cursor
+    std::cout << "\e[?25h";
     system("stty cooked");
     ::exit(0);
   }
