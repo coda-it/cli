@@ -18,4 +18,5 @@ script:
   - export CC=gcc-7
   - export CXX=g++-7
   - g++ --version
+  - g++-7 --version
   - make
