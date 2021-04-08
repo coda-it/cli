@@ -1,5 +1,5 @@
 all: 
-	g++ -std=c++17 -I $(HOME)/gowork/src/github.com/coda-it/cpputillib/include/ main.cpp -o main
+	g++ -std=c++11 -I $(HOME)/gowork/src/github.com/coda-it/cpputillib/include/ main.cpp -o main
 
 .PHONY: fix
 fix:
