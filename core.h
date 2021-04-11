@@ -17,8 +17,11 @@ public:
 
   Cli() {
     this->persistence = new Persistence();
-    this->menu["deploy"] = &Cli::deploy;
-    this->menu["exit"] = &Cli::exit;
+    std::map<std::string, MenuItem> deploy;
+    deploy["add-deploy"].handler = &Cli::deploy;
+    deploy["deploy"].handler = &Cli::deploy;
+    this->selectedItem->child["deployment"].child = deploy;
+    this->selectedItem->child["exit"].handler = &Cli::exit;
   }
 
   void render() {
@@ -28,7 +31,7 @@ public:
 
     int index = 0;
 
-    for (auto const &item : this->menu) {
+    for (auto const &item : this->selectedItem->child) {
       if (index == this->selected) {
         std::cout << "> " + item.first + "\n\r";
       } else {
@@ -55,18 +58,24 @@ public:
 private:
   Persistence *persistence;
   std::string userInput;
-  std::map<std::string, void (Cli::*)()> menu;
+  MenuItem menu;
+  MenuItem *selectedItem = &this->menu;
 
   void handleInput(char input) {
     if (input == KEY_UP && this->selected > 0) {
       this->selected -= 1;
-    } else if (input == KEY_DOWN && this->selected < this->menu.size() - 1) {
+    } else if (input == KEY_DOWN &&
+               this->selected < this->selectedItem->child.size() - 1) {
       this->selected += 1;
     } else if (input == KEY_ENTER) {
       int index = 0;
-      for (auto const &item : this->menu) {
+      for (auto const &item : this->selectedItem->child) {
         if (index == this->selected) {
-          (this->*menu[item.first])();
+          if (this->selectedItem->child.size() == 0) {
+            (this->*selectedItem->child[item.first].handler)();
+          } else {
+            this->selectedItem = &this->selectedItem->child[item.first];
+          }
         }
         index++;
       }
