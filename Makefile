@@ -15,3 +15,5 @@ version:
 	git commit --allow-empty -m "Build $(V)"
 	git tag --delete $(V)
 	git tag $(V)	
+
+	g++ -std=c++11 test.cpp -o test
