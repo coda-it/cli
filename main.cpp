@@ -6,5 +6,5 @@ Cli cli;
 
 int main() {
   cli.run();
-  return 0;
+  return EXIT_SUCCESS;
 }
