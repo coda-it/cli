@@ -16,7 +16,6 @@
 #define KEY_ENTER 10
 #define KEY_SQUARE_BRACKER 91
 #define KEY_ESC 27
-#define STDIN 0
 
 class Cli {
 public:
