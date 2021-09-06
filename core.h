@@ -12,13 +12,11 @@
 #define COMMAND_SEPARATOR " "
 #define KEY_UP 65
 #define KEY_DOWN 66
+#define KEY_LEFT 68
 #define KEY_ENTER 10
 #define KEY_SQUARE_BRACKER 91
 #define KEY_ESC 27
 #define STDIN 0
-
-struct timeval tv;
-char buff[255] = {0};
 
 class Cli {
 public:
@@ -32,14 +30,10 @@ public:
     this->selectedItem->child["deployment"].child = deploy;
     this->selectedItem->child["exit"].handler = &Cli::exit;
 
-    struct termios oldSettings, newSettings;
-    tcgetattr(fileno(stdin), &oldSettings);
-    newSettings = oldSettings;
-    newSettings.c_lflag &= (~ICANON & ~ECHO);
-    tcsetattr(fileno(stdin), TCSANOW, &newSettings);
-
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
+    tcgetattr(fileno(stdin), &this->defaultTTYSettings);
+    struct termios newTTYSettings = defaultTTYSettings;
+    newTTYSettings.c_lflag &= (~ICANON & ~ECHO);
+    tcsetattr(fileno(stdin), TCSANOW, &newTTYSettings);
   }
 
   void render() {
@@ -47,7 +41,7 @@ public:
     std::cout << "\e[?25l";
     // clear screen
     std::cout << "\033[2J\033[1;1H";
-    std::cout << "=== CODA_ CLI ===\n\r\n\r";
+    std::cout << "\n=== CODA_ CLI ===\n\r\n\r";
 
     int index = 0;
 
@@ -65,18 +59,7 @@ public:
   void run() {
     do {
       this->render();
-
-      fd_set set;
-      FD_ZERO(&set);
-      FD_SET(fileno(stdin), &set);
-
-      int res = select(fileno(stdin) + 1, &set, NULL, NULL, &tv);
-
-      if (res != -1) {
-        char c;
-        read(fileno(stdin), &c, 1);
-        this->handleInput(c);
-      }
+      this->handleInput(this->getInput());
 
     } while (true);
   }
@@ -89,6 +72,25 @@ private:
   MenuItem *path[2];
   int level = 0;
   bool shouldRerender = false;
+  struct termios defaultTTYSettings;
+
+  int getInput() {
+    fd_set set;
+
+    struct timeval tv;
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+
+    FD_ZERO(&set);
+    FD_SET(fileno(stdin), &set);
+
+    select(fileno(stdin) + 1, &set, NULL, NULL, &tv);
+
+    char input;
+    read(fileno(stdin), &input, 1);
+
+    return input;
+  }
 
   void handleInput(int parsedInput) {
     if (parsedInput == KEY_UP && this->selected > 0) {
@@ -111,12 +113,15 @@ private:
         }
         index++;
       }
-    } else if (parsedInput == KEY_ESC) {
+    } else if (parsedInput == KEY_LEFT) {
       if (this->level > 1) {
         this->selectedItem = this->path[this->level - 1];
         this->level--;
+        this->selected = 0;
       } else if (this->level == 1) {
         this->selectedItem = &this->menu;
+        this->level = 0;
+        this->selected = 0;
       }
     }
   }
@@ -124,6 +129,7 @@ private:
   void deploy() {}
 
   void exit() {
+    tcsetattr(fileno(stdin), TCSANOW, &this->defaultTTYSettings);
     // clear screen
     std::cout << "\033[2J\033[1;1H";
     // show cursor
