@@ -41,7 +41,7 @@ public:
     std::cout << "\e[?25l";
     // clear screen
     std::cout << "\033[2J\033[1;1H";
-    std::cout << "\n=== CODA_ CLI ===\n\r\n\r";
+    std::cout << "=== CODA_ CLI ===\n\r\n\r";
 
     int index = 0;
 
