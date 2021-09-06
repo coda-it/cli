@@ -1,6 +1,5 @@
 #include "persistence.h"
 #include "types.h"
-#include <algorithm>
 #include <iostream>
 #include <map>
 #include <string>
