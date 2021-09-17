@@ -1,6 +1,7 @@
 #include "persistence.h"
 #include "types.h"
 #include "views/select.h"
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
