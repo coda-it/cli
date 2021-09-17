@@ -1,6 +1,7 @@
 #ifndef H_VIEW_SELECT
 #define H_VIEW_SELECT
 
+#include <functional>
 #include "constants.h"
 
 class SelectView {
