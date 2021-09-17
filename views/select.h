@@ -46,7 +46,6 @@ public:
           } else {
             *level = *level + 1;
             path[*level] = &this->child[item.first];
-            std::cout << "en = " << *level << "|" << path[*level] <<"\n\r";
             this->selected = 0;
           }
         }
