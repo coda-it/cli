@@ -1,5 +1,6 @@
 #include "persistence.h"
 #include "types.h"
+#include "views/question.h"
 #include "views/select.h"
 #include <functional>
 #include <iostream>
@@ -14,9 +15,9 @@ class Cli {
 private:
   Persistence *persistence;
   std::string userInput;
-  SelectView *selectedItem;
-  SelectView *rootTask;
-  SelectView *path[2];
+  AbstractView *selectedItem;
+  AbstractView *rootTask;
+  AbstractView *path[3];
   int level = 0;
   bool shouldRerender = false;
 
@@ -51,14 +52,18 @@ public:
 
     this->persistence = new Persistence();
 
-    SelectView *rootTask = new SelectView();
+    AbstractView *rootTask = new SelectView();
     this->rootTask = rootTask;
 
-    SelectView *deployTask = new SelectView();
-    SelectView *deploySubTask =
+    AbstractView *deployTask = new SelectView();
+    AbstractView *deploySubTask =
         new SelectView([](void) { std::cout << "deploying ..."; });
-    deployTask->child["deploy"] = *deploySubTask;
-    rootTask->child["deploy"] = *deployTask;
+    deployTask->child["deploy"] = deploySubTask;
+
+    AbstractView *deployAddTask = new QuestionView();
+    deployTask->child["add-deploy"] = deployAddTask;
+
+    rootTask->child["deploy"] = deployTask;
 
     SelectView *exitTask = new SelectView([tTYSettings](void) {
       tcsetattr(fileno(stdin), TCSANOW, &tTYSettings);
@@ -69,7 +74,7 @@ public:
       system("stty cooked");
       ::exit(EXIT_SUCCESS);
     });
-    rootTask->child["exit"] = *exitTask;
+    rootTask->child["exit"] = exitTask;
 
     this->selectedItem = rootTask;
   }
