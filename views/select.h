@@ -3,18 +3,19 @@
 
 #include <functional>
 #include "constants.h"
+#include "../models/view.h"
 
-class SelectView {
+class SelectView: public AbstractView {
 public:
   int selected = 0;
-  std::map<std::string, SelectView> child;
-  std::function<void()> handler;
 
   SelectView() {
+    this->type = "select";
     this->handler = [](void) {};
   }
 
   SelectView(std::function<void()> callback) {
+    this->type = "select";
     this->handler = callback;
   }
 
@@ -32,7 +33,7 @@ public:
     }
   }
 
-  void handleInput(int parsedInput, SelectView **path, int *level) {
+  void handleInput(int parsedInput, AbstractView **path, int *level) {
     if (parsedInput == KEY_UP && this->selected > 0) {
       this->selected -= 1;
     } else if (parsedInput == KEY_DOWN &&
@@ -41,14 +42,20 @@ public:
     } else if (parsedInput == KEY_ENTER) {
       int index = 0;
       for (auto const &item : this->child) {
-        if (index == this->selected) {
-          if (this->child[item.first].child.size() == 0) {
-            this->child[item.first].handler();
-          } else {
-            *level = *level + 1;
-            path[*level] = &this->child[item.first];
-            this->selected = 0;
+        if (this->child[item.first]->type == "select") {
+          if (index == this->selected) {
+              if (this->child[item.first]->child.size() == 0) {
+                this->child[item.first]->handler();
+              } else {
+                *level = *level + 1;
+                path[*level] = this->child[item.first];
+                this->selected = 0;
+              }
           }
+        } else if (this->child[item.first]->type == "question") {
+            *level = *level + 1;
+            path[*level] = this->child[item.first];
+            this->selected = 0;
         }
         index++;
       }
