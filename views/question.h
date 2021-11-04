@@ -7,19 +7,26 @@
 #include "../models/view.h"
 
 class QuestionView: public AbstractView {
+  std::string question;
+  std::string response;
+
 public:
-  QuestionView() {
+  QuestionView(std::string question) {
     this->type = "question";
     this->handler = [](void) {};
+    this->question = question;
+    this->response = "";
   }
 
-  QuestionView(std::function<void()> callback) {
+  QuestionView(std::string question, std::function<void()> callback) {
     this->type = "question";
     this->handler = callback;
+    this->question = question;
+    this->response = "";
   }
 
   void render() {
-    std::cout << "question content \n\r\n\r";
+    std::cout << this->question + ": " + this->response + "\n\r\n\r";
   }
 
   void handleInput(int parsedInput, AbstractView **path, int *level) {
@@ -27,6 +34,11 @@ public:
       if (*level > 0) {
         *level = *level - 1;
       }
+    } else if (parsedInput == KEY_ENTER) {
+      this->handler();
+      *level = *level - 1;
+    } else {
+      this->response += parsedInput;
     }
   }
 };
