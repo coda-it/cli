@@ -60,7 +60,7 @@ public:
         new SelectView([](void) { std::cout << "deploying ..."; });
     deployTask->child["deploy"] = deploySubTask;
 
-    AbstractView *deployAddTask = new QuestionView();
+    AbstractView *deployAddTask = new QuestionView("deployment script path");
     deployTask->child["add-deploy"] = deployAddTask;
 
     rootTask->child["deploy"] = deployTask;
